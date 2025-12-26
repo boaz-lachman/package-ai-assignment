@@ -2,7 +2,7 @@ This is the solution to the assignment given to me as part of the Package.ai int
 
 How to run the app:
 
-option 1: download the app from the link using a n android device.
+option 1: download the app from the link https://expo.dev/accounts/boaz606/projects/package-ai-assignment/builds/1635654b-182a-4be1-a2a7-edcacdd0b273 using an android device.
 
 option 2: connect to this repo, download the code and do the following:
 1. Run in terrminal "npm install" to install all the node modules needed for the app
