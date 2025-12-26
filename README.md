@@ -2,7 +2,7 @@ This is the solution to the assignment given to me as part of the Package.ai int
 
 How to run the app:
 
-option 1: I will sent an apk to you to run on the phone.
+option 1: download the app from the link using a n android device.
 
 option 2: connect to this repo, download the code and do the following:
 1. Run in terrminal "npm install" to install all the node modules needed for the app
