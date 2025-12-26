@@ -1,6 +1,5 @@
 import { NetworkRequest, RequestSize } from "../models/networkRequest"
 import { Image } from 'react-native';
-import tigerImage from '../../assets/tiger.jpg';
 
 //for creating dummy requests to test architecture
 
@@ -14,7 +13,7 @@ const createSmallNetworkRequest = ( id: string, url: string,) => {
 
 const createBigNetworkRequest = (id: string,url: string) => {
     return new NetworkRequest(id, url, {
-        uri: Image.resolveAssetSource(tigerImage).uri
+        uri: Image.resolveAssetSource(require("../../assets/tiger.jpg")).uri
     }, new Date(), RequestSize.Large);
 }
 
