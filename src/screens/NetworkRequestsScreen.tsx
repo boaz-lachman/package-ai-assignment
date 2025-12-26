@@ -145,8 +145,8 @@ const NetworkRequestsScreen: React.FC = () => {
     },
     {
       title: 'Add Large Request',
-      onPress: () => {
-        const newLargeRequest = createBigNetworkRequest(uuid.v4(), 'https://httpbin.org/post' );
+      onPress: async () => {
+        const newLargeRequest = await createBigNetworkRequest(uuid.v4(), 'https://httpbin.org/post' );
         dispatch(addNetworkRequest(newLargeRequest));
         dispatch(setSendingStatus(sendingStatus.INPROGRESS));
       },

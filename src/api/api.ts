@@ -53,7 +53,7 @@ const createPostRequest = (networkRequest: NetworkRequest, onSuccess: (request: 
     else {
         const formData = new FormData();
         formData.append('image', {
-            uri: Platform.OS === 'android' ?networkRequest.data.uri :networkRequest.data.uri.replace('file://', ''),
+            uri: Platform.OS === 'android' ? networkRequest.data.uri :networkRequest.data.uri.replace('file://', ''),
             name: `image.jpeg`,
             type: 'image/jpeg', // it may be necessary in Android. 
           });
