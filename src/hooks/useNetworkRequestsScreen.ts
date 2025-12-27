@@ -8,6 +8,7 @@ import { NetworkRequest } from '../models/networkRequest';
 import { useNetInfoInstance } from '@react-native-community/netinfo';
 import { Alert } from 'react-native';
 import useAppIsInForeground from './useAppIsInForeground';
+import { format } from "date-fns";
 
 
 
@@ -25,7 +26,7 @@ const useNetworkRequestsScreen = () => {
             postAllRequests(networkRequests, 
                 (networkRequest: NetworkRequest) => {
                   successCount++;
-                  showSuccess(`${networkRequest.size} request sent successfully at ${new Date().toLocaleTimeString()}`);
+                  showSuccess(`${networkRequest.size} request sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')}`);
                 dispatch(removeNetworkRequest(networkRequest.id));
             }, (networkRequest: NetworkRequest) => {
                 failureCount++;
@@ -38,7 +39,7 @@ const useNetworkRequestsScreen = () => {
                 // Show summary message if multiple requests
                 if (totalRequests > 1) {
                   if (failureCount === 0) {
-                    showSuccess(`All ${successCount} requests sent successfully at ${new Date().toLocaleTimeString()} `);
+                    showSuccess(`All ${successCount} requests sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')} `);
                   } else if (successCount === 0) {
                     showError(`Failed to send ${failureCount} requests`);
                   } else {
@@ -101,7 +102,7 @@ const useNetworkRequestsScreen = () => {
 
   const refreshSendingNetworkRequest = (networkRequest: NetworkRequest) => {
     postRequest(networkRequest,  (networkRequest: NetworkRequest) => {
-        showSuccess(`${networkRequest.size} request sent successfully at ${new Date().toLocaleTimeString()}`);
+        showSuccess(`${networkRequest.size} request sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')}`);
      dispatch(removeNetworkRequest(networkRequest.id));
   }, (networkRequest: NetworkRequest) => {
     showError(`Failed to send request`);

@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { NetworkRequest, RequestSize } from '../models/networkRequest';
+import { format } from "date-fns";
 
 interface NetworkRequestItemProps {
     handleRefreshExt: Function,
@@ -16,6 +17,7 @@ interface NetworkRequestItemProps {
 }
 
 const ACTION_WIDTH = 100;
+
 
 const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRemoveExt, handleRefreshExt }) => {
   const swipeableRef = useRef<React.ComponentRef<typeof Swipeable>>(null);
@@ -100,7 +102,7 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRem
         )}
         <Text style={styles.size}>Size: {item.size}</Text>
         <Text style={styles.date}>
-          {item.createdAt.toLocaleString()}
+          { format(item.createdAt, 'dd/MM/yyyy HH:mm')}
         </Text>
       </Animated.View>
     </Swipeable>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -18,10 +18,10 @@ import ConnectivityInfoBanner from '../components/ConnectivityInfoBanner';
 import useNetworkRequestsScreen from '../hooks/useNetworkRequestsScreen';
 
 
-const {handleClearAll, networkRequests, isSending,  
-  refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue} = useNetworkRequestsScreen();
-
 const NetworkRequestsScreen: React.FC = () => {
+
+  const {handleClearAll, networkRequests, isSending,  
+    refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue} = useNetworkRequestsScreen();
   const renderItem = ({ item }: { item: NetworkRequest }) => {
     return (
       <NetworkRequestItem
@@ -54,7 +54,7 @@ const NetworkRequestsScreen: React.FC = () => {
   ];
 
   const keyExtractor = (item: NetworkRequest) => item.id;
-  const combined = [...networkRequests.small, ...networkRequests.large];
+  const combined = useMemo(() => [...networkRequests.small, ...networkRequests.large], [networkRequests]);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.titleBar}>

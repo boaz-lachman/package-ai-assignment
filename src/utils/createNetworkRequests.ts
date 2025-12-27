@@ -1,13 +1,16 @@
 import { NetworkRequest, RequestSize } from "../models/networkRequest"
-import { Image } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Asset } from 'expo-asset';
+import { randomDriverNames, randomImageNames, randomImages } from "../constants/networkRequestRandomValues";
+import { getRandomItem } from "./randomiser";
 
 //for creating dummy requests to test architecture
 
 const createSmallNetworkRequest = ( id: string, url: string,) => {
+    let randomDriverName: string = getRandomItem(randomDriverNames)
+
     return new NetworkRequest(id, url, {
-        'driver': 'Boaz Lachman',
+        'driver': randomDriverName,
         'status': 'delivering',
         'shift': 'night Shift'
     }, new Date(), RequestSize.Small);
@@ -15,12 +18,14 @@ const createSmallNetworkRequest = ( id: string, url: string,) => {
 
 //copy asset to local ddevice to avoid file not found exception in build apk
 const copyAssetToFile = async () => {
-    const asset = Asset.fromModule(require('../../assets/tiger.jpg'));
+    let randomImage: string = getRandomItem(randomImages);
+    let randomImageName: string = getRandomItem(randomImageNames);
+    const asset = Asset.fromModule(randomImage);
 
     await asset.downloadAsync();
   
   // Copy to a permanent location
-    const destPath = `${FileSystem.documentDirectory}tiger.jpg`; 
+    const destPath = `${FileSystem.documentDirectory}${randomImageName}.jpg`; 
     FileSystem.copyAsync({
         from: asset.localUri!,
         to: destPath

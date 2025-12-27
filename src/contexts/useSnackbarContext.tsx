@@ -4,6 +4,7 @@ import { Snackbar } from 'react-native-paper';
 interface SnackbarContextType {
   showSuccess: (message: string) => void;
   showError: (message: string) => void;
+  isVisible: boolean
 }
 //for managing the in app snackbar
 const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
@@ -40,7 +41,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <SnackbarContext.Provider value={{ showSuccess, showError }}>
+    <SnackbarContext.Provider value={{ showSuccess, showError, isVisible: snackbar.visible }}>
       {children}
       <Snackbar
         visible={snackbar.visible}

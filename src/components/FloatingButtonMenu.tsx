@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -16,6 +16,7 @@ import Animated, {
   Easing
 } from 'react-native-reanimated';
 import FloatingButtonMenuOption from './FloatingButtonMenuOption';
+import { useSnackbar } from '../contexts/useSnackbarContext';
 
 //for displaying a floating button with multiple options
 
@@ -41,9 +42,15 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
   position = 'bottom-right',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isVisible } = useSnackbar();
   const menuScale = useSharedValue(0);
   const rotation = useSharedValue(0);
+  const buttonLift = useSharedValue(0);
   const optionScales = options.map(() => useSharedValue(0));
+
+  useEffect(() => {
+    buttonLift.value = withTiming(isVisible ? -100 : 0, {duration: 200, easing: Easing.linear});
+  }, [isVisible])
 
   const toggleMenu = () => {
     const newIsOpen = !isOpen;
@@ -86,7 +93,7 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
 
   const mainButtonStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotation.value}deg` }],
+      transform: [{ rotate: `${rotation.value}deg` }, { translateY: buttonLift.value }],
     };
   });
 
@@ -118,6 +125,8 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
       };
     });
   };
+
+  
 
   const getContainerStyle = () => {
     const baseStyle = styles.container;

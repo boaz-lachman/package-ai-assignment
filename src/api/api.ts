@@ -19,8 +19,8 @@ axiosRetry(axios, { retries: 3,
 
 const postAllRequests = async (networkRequests: {small: NetworkRequest[], large: NetworkRequest[]}, 
     onSuccess: (request: NetworkRequest) => void, onFailure: (request: NetworkRequest) => void, onFinish: Function) => {
-    await postAllRequestsFromAType(networkRequests.small, onSuccess, onFailure);
-    await postAllRequestsFromAType(networkRequests.large, onSuccess, onFailure);
+    await postAllRequestsFromAType(networkRequests.small, onSuccess, onFailure); //first try to send all the small requests simoltanously
+    await postAllRequestsFromAType(networkRequests.large, onSuccess, onFailure); //then try to send all the large requests simoltanously
     onFinish();
 }
 
