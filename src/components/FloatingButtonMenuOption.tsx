@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, I18nManager } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FloatingButtonOption } from './FloatingButtonMenu';
 
@@ -8,6 +8,7 @@ interface FloatingButtonMenuOptionProps {
   animatedStyle: any;
   isOpen: boolean;
   onPress: (option: FloatingButtonOption) => void;
+  isRTL?: boolean;
 }
 
 const FloatingButtonMenuOption: React.FC<FloatingButtonMenuOptionProps> = ({
@@ -15,10 +16,17 @@ const FloatingButtonMenuOption: React.FC<FloatingButtonMenuOptionProps> = ({
   animatedStyle,
   isOpen,
   onPress,
+  isRTL = false,
 }) => {
+  const rtlValue = isRTL || I18nManager.isRTL;
+  
   return (
     <Animated.View
-      style={[styles.optionButton, animatedStyle]}
+      style={[
+        styles.optionButton,
+        rtlValue ? styles.optionButtonRTL : styles.optionButtonLTR,
+        animatedStyle
+      ]}
       pointerEvents={isOpen ? 'auto' : 'none'}
     >
       <TouchableOpacity
@@ -39,7 +47,12 @@ const styles = StyleSheet.create({
   optionButton: {
     position: 'absolute',
     width: 200,
+  },
+  optionButtonLTR: {
     alignItems: 'flex-end',
+  },
+  optionButtonRTL: {
+    alignItems: 'flex-start',
   },
   optionButtonContent: {
     paddingHorizontal: 16,

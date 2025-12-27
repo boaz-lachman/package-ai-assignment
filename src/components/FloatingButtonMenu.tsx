@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   Dimensions,
+  I18nManager,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -97,12 +98,15 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
   });
 
   const getOptionStyle = (index: number) => {
+    const isRTL = I18nManager.isRTL;
     return useAnimatedStyle(() => {
       const scale = optionScales[index].value;
+      // Flip translateX direction for RTL
+      const translateXValue = isRTL ? SCREEN_WIDTH / 3 : -SCREEN_WIDTH / 3;
       const translateX = interpolate(
         scale,
         [0, 1],
-        [0, -SCREEN_WIDTH / 3],
+        [0, translateXValue],
         Extrapolation.CLAMP
       );
       const translateY = interpolate(
@@ -127,7 +131,18 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
 
   const getContainerStyle = () => {
     const baseStyle = styles.container;
-    switch (position) {
+    const isRTL = I18nManager.isRTL;
+    
+    // Flip positions for RTL
+    let adjustedPosition = position;
+    if (isRTL) {
+      if (position === 'bottom-right') adjustedPosition = 'bottom-left';
+      else if (position === 'bottom-left') adjustedPosition = 'bottom-right';
+      else if (position === 'top-right') adjustedPosition = 'top-left';
+      else if (position === 'top-left') adjustedPosition = 'top-right';
+    }
+    
+    switch (adjustedPosition) {
       case 'bottom-right':
         return [baseStyle, styles.bottomRight];
       case 'bottom-left':
@@ -146,7 +161,11 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
       {/* Backdrop */}
       {isOpen && (
         <Animated.View
-          style={[styles.backdrop, backdropStyle]}
+          style={[
+            styles.backdrop,
+            I18nManager.isRTL ? styles.backdropRTL : styles.backdropLTR,
+            backdropStyle
+          ]}
           pointerEvents={isOpen ? 'auto' : 'none'}
         >
           <TouchableOpacity
@@ -167,6 +186,7 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
             animatedStyle={optionStyle}
             isOpen={isOpen}
             onPress={handleOptionPress}
+            isRTL={I18nManager.isRTL}
           />
         );
       })}
@@ -212,8 +232,13 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT * 2,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: SCREEN_WIDTH,
-    left: -SCREEN_WIDTH / 2,
     top: -SCREEN_HEIGHT / 2,
+  },
+  backdropLTR: {
+    left: -SCREEN_WIDTH / 2,
+  },
+  backdropRTL: {
+    right: -SCREEN_WIDTH / 2,
   },
   mainButton: {
     width: 60,

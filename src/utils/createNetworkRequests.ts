@@ -35,7 +35,7 @@ const copyAssetToFile = async () => {
 
 const createBigNetworkRequest = async (id: string, url: string) => {
     const newPath = await copyAssetToFile();
-    return new NetworkRequest(id, url, {
+    return new NetworkRequest(id, '1212', {
         uri: newPath
     }, new Date(), RequestSize.Large);
 }
