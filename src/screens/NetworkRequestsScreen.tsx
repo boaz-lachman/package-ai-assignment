@@ -1,132 +1,34 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useDispatch, useSelector } from 'react-redux';
 import { NetworkRequest } from '../models/networkRequest';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import NetworkRequestItem from '../components/NetworkRequestItem';
-import { addNetworkRequest, networkRequestsState, removeAllNetworkRequests, removeNetworkRequest, setSendingStatus } from '../reducers/networkRequestsReducer';
+
 import FloatingButtonMenu, { FloatingButtonOption } from '../components/FloatingButtonMenu';
 import { createBigNetworkRequest, createSmallNetworkRequest } from '../utils/createNetworkRequests';
 import uuid from 'react-native-uuid';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { sendingStatus } from '../constants/sendingStatus';
-import { postAllRequests, postRequest } from '../api/api';
-import { useSnackbar } from '../contexts/useSnackbarContext';
 import ConnectivityInfoBanner from '../components/ConnectivityInfoBanner';
-import { useNetInfoInstance } from '@react-native-community/netinfo';
-import useAppIsInForeground from '../hooks/useAppIsInForeground';
+import useNetworkRequestsScreen from '../hooks/useNetworkRequestsScreen';
 
 
-
+const {handleClearAll, networkRequests, isSending,  
+  refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue} = useNetworkRequestsScreen();
 
 const NetworkRequestsScreen: React.FC = () => {
-  const networkRequests = useSelector((state: networkRequestsState) => state.networkRequests || {small:[], large: []});
-  const isSending = useSelector((state: networkRequestsState) => state.sendingStatus === sendingStatus.INPROGRESS);
-  const dispatch = useDispatch();
-  const { showSuccess, showError } = useSnackbar();
   const renderItem = ({ item }: { item: NetworkRequest }) => {
-    return <NetworkRequestItem handleRemoveExt={() => {
-        dispatch(removeNetworkRequest(item.id))
-    }}
-    handleRefreshExt={() => {
-        postRequest(item,  (networkRequest: NetworkRequest) => {
-           showSuccess(`${networkRequest.size} request sent successfully at ${new Date().toLocaleTimeString()}`);
-        dispatch(removeNetworkRequest(networkRequest.id));
-    }, (networkRequest: NetworkRequest) => {
-      showError(`Failed to send request`);
-    }, 
-    () =>{
-       
-    })
-    }}
-     item={item} />;
-  };
-
-
-  // function for sending all the network requests in the queue
-  const sendingAllRequests = () => {
-    let successCount = 0;
-        let failureCount = 0;
-        const totalRequests = networkRequests.small.length + networkRequests.large.length;
-
-        postAllRequests(networkRequests, 
-            (networkRequest: NetworkRequest) => {
-              successCount++;
-              showSuccess(`${networkRequest.size} request sent successfully at ${new Date().toLocaleTimeString()}`);
-            dispatch(removeNetworkRequest(networkRequest.id));
-        }, (networkRequest: NetworkRequest) => {
-            failureCount++;
-            if(totalRequests === 1) {
-            showError(`Failed to send request`);
-            }
-        }, () =>{
-            dispatch(setSendingStatus(sendingStatus.IDLE));
-            
-            // Show summary message if multiple requests
-            if (totalRequests > 1) {
-              if (failureCount === 0) {
-                showSuccess(`All ${successCount} requests sent successfully at ${new Date().toLocaleTimeString()} `);
-              } else if (successCount === 0) {
-                showError(`Failed to send ${failureCount} requests`);
-              } else {
-                showError(`${successCount} succeeded, ${failureCount} failed`);
-              }
-            }
-        });
-    }
-
-
-    /*when to initiate sending all requests */ 
-  useEffect(() => {
-    if(isSending) {
-      sendingAllRequests();
-    }
-  }, [isSending]);
-
-
-  /*listening to both network changes and background foreground changes */ 
-  const { netInfo: { type, isConnected }, refresh } = useNetInfoInstance();
-
-  useEffect(() => {
-    if(isConnected) {
-      dispatch(setSendingStatus(sendingStatus.INPROGRESS));
-    }
-  },[isConnected] )
-
-  const isAppInForeground = useAppIsInForeground();
-
-  useEffect(() => {
-    if(isAppInForeground) {
-      dispatch(setSendingStatus(sendingStatus.INPROGRESS));
-    }
-  }, [isAppInForeground])
-
-
-
-  const handleClearAll = () => {
-    Alert.alert(
-      'Clear All',
-      'Are you sure you want to remove all unsent requests?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => {
-            dispatch(removeAllNetworkRequests());
-          },
-        },
-      ]
+    return (
+      <NetworkRequestItem
+        handleRemoveExt={() => removeNetworkRequestExt(item)}
+        handleRefreshExt={() => refreshSendingNetworkRequest(item)}
+        item={item}
+      />
     );
   };
 
@@ -137,9 +39,7 @@ const NetworkRequestsScreen: React.FC = () => {
       title: 'Add Small Request',
       onPress: () => {
         const newSmallRequest = createSmallNetworkRequest(uuid.v4(), 'https://httpbin.org/post' );
-        dispatch(addNetworkRequest(newSmallRequest));
-        dispatch(setSendingStatus(sendingStatus.INPROGRESS));
-       
+        addNetworkRequestToQueue(newSmallRequest);
     },
       color: '#FF6B6B',
     },
@@ -147,8 +47,7 @@ const NetworkRequestsScreen: React.FC = () => {
       title: 'Add Large Request',
       onPress: async () => {
         const newLargeRequest = await createBigNetworkRequest(uuid.v4(), 'https://httpbin.org/post' );
-        dispatch(addNetworkRequest(newLargeRequest));
-        dispatch(setSendingStatus(sendingStatus.INPROGRESS));
+        addNetworkRequestToQueue(newLargeRequest);
       },
       color: '#4ECDC4',
     },

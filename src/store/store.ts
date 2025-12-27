@@ -2,6 +2,7 @@ import { configureStore  } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from 'redux-persist'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import networkRequestsReducer from "./networkRequestsReducer";
+import { isDev } from "../config";
 
 const persistConfig = {
     key: "root",
@@ -12,7 +13,7 @@ const persistedReducer = persistReducer(persistConfig, networkRequestsReducer);
 
 export const configStore = configureStore({
     reducer: persistedReducer,
-    devTools: process.env.NODE_ENV !== 'production',
+    devTools: isDev,
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware({
             serializableCheck: false
