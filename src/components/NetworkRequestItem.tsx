@@ -87,7 +87,7 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRem
       </View>
       {item.size === RequestSize.Large && (
         <>
-         <Text style={styles.title}>Package was delivered 👍. See an image of where was is placed:</Text>
+         <Text style={styles.title}>Package was delivered 👍. See an image of where it was placed:</Text>
         <Image source={{ uri: item.data.uri }} style={styles.image} resizeMode="cover" />
         </>
       )}
