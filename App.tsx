@@ -11,10 +11,11 @@ import { useEffect } from 'react';
 
 export default function App() {
 
+  const unlockScreenOerientation = async () => {
+    await ScreenOrientation.unlockAsync()
+  }
+  
   useEffect(() => {
-    const unlockScreenOerientation = async () => {
-      await ScreenOrientation.unlockAsync()
-    }
     unlockScreenOerientation()
   }, [])
 
