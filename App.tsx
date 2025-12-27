@@ -6,8 +6,17 @@ import { PersistGate } from 'redux-persist/integration/react';
 import NetworkRequestsScreen from './src/screens/NetworkRequestsScreen';
 import { SnackbarProvider } from './src/contexts/useSnackbarContext';
 import { PaperProvider } from 'react-native-paper';
+import * as ScreenOrientation from "expo-screen-orientation"
+import { useEffect } from 'react';
 
 export default function App() {
+
+  useEffect(() => {
+    const unlockScreenOerientation = async () => {
+      await ScreenOrientation.unlockAsync()
+    }
+    unlockScreenOerientation()
+  }, [])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

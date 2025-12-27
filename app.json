@@ -36,6 +36,12 @@
           "image": "./assets/Package_ai_Logo.png",
           "imageWidth": 200
         }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "DEFAULT"
+        }
       ]
     ],
     "extra": {
