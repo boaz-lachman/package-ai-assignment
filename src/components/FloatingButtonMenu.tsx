@@ -102,7 +102,7 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
     return useAnimatedStyle(() => {
       const scale = optionScales[index].value;
       // Flip translateX direction for RTL
-      const translateXValue = isRTL ? SCREEN_WIDTH / 3 : -SCREEN_WIDTH / 3;
+      const translateXValue = isRTL ? SCREEN_WIDTH / 500 : -SCREEN_WIDTH / 2.5;
       const translateX = interpolate(
         scale,
         [0, 1],

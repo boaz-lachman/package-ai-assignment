@@ -1,4 +1,5 @@
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
+import { StatusBar, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
 import { configStore, persistor } from './src/store/store';
@@ -25,7 +26,7 @@ export default function App() {
         <PersistGate loading={null} persistor={persistor}>
           <PaperProvider>
             <SnackbarProvider>
-              <StatusBar style="auto" />
+              <ExpoStatusBar style="dark" backgroundColor='#f5f5f5' translucent={false} />
               <NetworkRequestsScreen/>
             </SnackbarProvider>
           </PaperProvider>

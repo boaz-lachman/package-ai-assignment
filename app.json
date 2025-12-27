@@ -22,7 +22,11 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.boaz606.packageaiassignment"
+      "package": "com.boaz606.packageaiassignment",
+      "statusBar": {
+        "backgroundColor": "#f5f5f5",
+        "barStyle": "dark-content"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -42,9 +46,14 @@
         {
           "initialOrientation": "DEFAULT"
         }
-      ]
+      ],
+      ["expo-localization", {
+        "fallbackLocale": "en",
+        "availableLocales": ["en", "he"]
+      }]
     ],
     "extra": {
+      "supportsRTL": true,
       "eas": {
         "projectId": "0d36318c-3d8d-478d-ab57-20fd78e10e4f"
       }

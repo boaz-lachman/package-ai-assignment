@@ -4,11 +4,13 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NetworkRequest } from '../models/networkRequest';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetworkRequestItem from '../components/NetworkRequestItem';
 
 import FloatingButtonMenu, { FloatingButtonOption } from '../components/FloatingButtonMenu';
@@ -20,6 +22,7 @@ import useNetworkRequestsScreen from '../hooks/useNetworkRequestsScreen';
 import { NETWORK_ADDRESS } from '../constants/networkAddress';
 
 const NetworkRequestsScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const { handleClearAll, networkRequests, isSending,
     refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue } = useNetworkRequestsScreen();
   const renderItem = ({ item }: { item: NetworkRequest }) => {
@@ -59,11 +62,13 @@ const NetworkRequestsScreen: React.FC = () => {
     return allRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [networkRequests]);
   return (
-    <LinearGradient
-      colors={['#20B2AA', '#FFFFFF']}
-      style={styles.gradient}
-    >
-      <SafeAreaView style={styles.container}>
+    <View style={styles.wrapper}>
+      <View style={[styles.statusBarBackground, { height: insets.top }]} />
+      <LinearGradient
+        colors={['#20B2AA', '#FFFFFF']}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
         <View style={styles.titleBar}>
           <View style={styles.titleContainer}>
             <TitleSpinner isVisible={isSending} />
@@ -100,12 +105,20 @@ const NetworkRequestsScreen: React.FC = () => {
           mainButtonIcon="+"
           position="bottom-right"
         />
-      </SafeAreaView>
-    </LinearGradient>
+        </SafeAreaView>
+      </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
+  statusBarBackground: {
+    backgroundColor: '#FFFFFF',
+    width: '100%',
+  },
   gradient: {
     flex: 1,
   },
