@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { Asset } from 'expo-asset';
 import { randomDriverNames, randomImageNames, randomImages } from "../constants/networkRequestRandomValues";
 import { getRandomItem } from "./randomiser";
-
+import uuid from 'react-native-uuid';
 //for creating dummy requests to test architecture
 
 const createSmallNetworkRequest = (id: string, url: string,) => {
@@ -18,14 +18,13 @@ const createSmallNetworkRequest = (id: string, url: string,) => {
 
 //copy asset to local ddevice to avoid file not found exception in build apk
 const copyAssetToFile = async () => {
-    const randomImage: string = getRandomItem(randomImages);
-    const randomImageName: string = getRandomItem(randomImageNames);
+    const randomImage: string = getRandomItem(randomImages)
     const asset = Asset.fromModule(randomImage);
 
     await asset.downloadAsync();
 
   // Copy to a permanent location
-    const destPath = `${FileSystem.documentDirectory}${randomImageName}.jpg`;
+    const destPath = `${FileSystem.documentDirectory}${uuid.v4()}.jpg`;
     FileSystem.copyAsync({
         from: asset.localUri!,
         to: destPath
