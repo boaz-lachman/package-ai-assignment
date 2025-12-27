@@ -49,7 +49,7 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
   const optionScales = options.map(() => useSharedValue(0));
 
   useEffect(() => {
-    buttonLift.value = withTiming(isVisible ? -100 : 0, {duration: 200, easing: Easing.linear});
+    buttonLift.value = withTiming(isVisible ? -100 : 0, { duration: 200, easing: Easing.linear });
   }, [isVisible])
 
   const toggleMenu = () => {
@@ -57,11 +57,10 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
     setIsOpen(newIsOpen);
 
     if (newIsOpen) {
-    
       rotation.value = withSpring(45, { damping: 15 });
-      
+
       // Animate each option button with staggered delay
-      optionScales.forEach((scale, index) => {
+      optionScales.forEach((scale) => {
         scale.value = withTiming(1, {
          duration: 300, easing: Easing.bounce,
         }, () => {
@@ -70,9 +69,9 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
       });
     } else {
       rotation.value = withSpring(0, { damping: 15 });
-      
+
       optionScales.forEach((scale) => {
-        scale.value = withTiming(0, {  duration: 300, easing: Easing.bounce, });
+        scale.value = withTiming(0, { duration: 300, easing: Easing.bounce, });
       });
     }
   };
@@ -103,7 +102,7 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
       const translateX = interpolate(
         scale,
         [0, 1],
-        [0, -SCREEN_WIDTH / 3 ],
+        [0, -SCREEN_WIDTH / 3],
         Extrapolation.CLAMP
       );
       const translateY = interpolate(
@@ -120,13 +119,11 @@ const FloatingButtonMenu: React.FC<FloatingButtonMenuProps> = ({
       );
 
       return {
-        transform: [{translateX},{  translateY }, { scale }],
+        transform: [{ translateX }, { translateY }, { scale }],
         opacity,
       };
     });
   };
-
-  
 
   const getContainerStyle = () => {
     const baseStyle = styles.container;
@@ -239,4 +236,3 @@ const styles = StyleSheet.create({
 });
 
 export default FloatingButtonMenu;
-

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Snackbar } from 'react-native-paper';
 
 interface SnackbarContextType {
@@ -66,4 +66,3 @@ export const useSnackbar = () => {
   }
   return context;
 };
-

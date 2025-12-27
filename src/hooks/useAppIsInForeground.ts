@@ -1,6 +1,5 @@
-import {useEffect, useRef, useState} from 'react';
-import {AppState} from 'react-native';
-
+import { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 
 //custom hook for detecting if app is in foreground
 const useAppIsInForeground = () => {

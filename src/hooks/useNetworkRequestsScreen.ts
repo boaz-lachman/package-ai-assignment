@@ -1,85 +1,73 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { sendingStatus } from '../constants/sendingStatus';
 import { useSnackbar } from '../contexts/useSnackbarContext';
-import { addNetworkRequest, networkRequestsState, removeAllNetworkRequests, removeNetworkRequest, setSendingStatus } from '../store/networkRequestsReducer';
+import { addNetworkRequest, networkRequestsState, removeAllNetworkRequests, removeNetworkRequest, setNetworkRequestAsSent, setSendingStatus } from '../store/networkRequestsReducer';
 import { postAllRequests, postRequest } from '../api/api';
-import { NetworkRequest } from '../models/networkRequest';
+import { NetworkRequest, RequestSize } from '../models/networkRequest';
 import { useNetInfoInstance } from '@react-native-community/netinfo';
 import { Alert } from 'react-native';
 import useAppIsInForeground from './useAppIsInForeground';
 import { format } from "date-fns";
 
-
-
 const useNetworkRequestsScreen = () => {
-    const networkRequests = useSelector((state: networkRequestsState) => state.networkRequests || {small:[], large: []});
+    const networkRequests = useSelector((state: networkRequestsState) => state.networkRequests || { small: [], large: [] });
     const isSending = useSelector((state: networkRequestsState) => state.sendingStatus === sendingStatus.INPROGRESS);
     const dispatch = useDispatch();
-    const { showSuccess, showError } = useSnackbar();
+    const { showSuccess } = useSnackbar();
 
     const sendingAllRequests = () => {
         let successCount = 0;
-            let failureCount = 0;
-            const totalRequests = networkRequests.small.length + networkRequests.large.length;
-    
-            postAllRequests(networkRequests, 
+            const failureCount = 0;
+            const totalRequests = networkRequests.small.filter(req => !req.isSent).length + networkRequests.large.filter(req => !req.isSent).length;
+
+            postAllRequests(networkRequests,
                 (networkRequest: NetworkRequest) => {
                   successCount++;
-                  showSuccess(`${networkRequest.size} request sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')}`);
-                dispatch(removeNetworkRequest(networkRequest.id));
-            }, (networkRequest: NetworkRequest) => {
-                failureCount++;
-                if(totalRequests === 1) {
-                showError(`Failed to send request`);
-                }
+                  showSuccess(`${networkRequest.size === RequestSize.Small ? 'Status Update' : 'Image Verification'} request sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')}`);
+                dispatch(setNetworkRequestAsSent(networkRequest.id));
+            }, () => {
+              //maybe to be added later
             }, () =>{
                 dispatch(setSendingStatus(sendingStatus.IDLE));
-                
+
                 // Show summary message if multiple requests
                 if (totalRequests > 1) {
-                  if (failureCount === 0) {
-                    showSuccess(`All ${successCount} requests sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')} `);
-                  } else if (successCount === 0) {
-                    showError(`Failed to send ${failureCount} requests`);
-                  } else {
-                    showError(`${successCount} succeeded, ${failureCount} failed`);
-                  }
+                  if (successCount !== 0) {
+                    showSuccess(`${successCount} updates sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')} `);
+                  } else {}
                 }
             });
         }
 
-     /*when to initiate sending all requests */ 
+     /*when to initiate sending all requests */
   useEffect(() => {
-    if(isSending) {
+    if (isSending) {
       sendingAllRequests();
     }
   }, [isSending]);
 
-
-  /*listening to both network changes and background foreground changes */ 
-  const { netInfo: {  isConnected } } = useNetInfoInstance();
+  /*listening to both network changes and background foreground changes */
+  const { netInfo: { isConnected } } = useNetInfoInstance();
 
   useEffect(() => {
-    if(isConnected) {
+    if (isConnected) {
       dispatch(setSendingStatus(sendingStatus.INPROGRESS));
     }
-  },[isConnected] )
+  }, [isConnected])
 
   const isAppInForeground = useAppIsInForeground();
 
   useEffect(() => {
-    if(isAppInForeground) {
+    if (isAppInForeground) {
       dispatch(setSendingStatus(sendingStatus.INPROGRESS));
     }
   }, [isAppInForeground])
 
-
-
   const handleClearAll = () => {
     Alert.alert(
       'Clear All',
-      'Are you sure you want to remove all unsent requests?',
+      'Are you sure you want to remove all updates?',
       [
         {
           text: 'Cancel',
@@ -101,25 +89,24 @@ const useNetworkRequestsScreen = () => {
   }
 
   const refreshSendingNetworkRequest = (networkRequest: NetworkRequest) => {
-    postRequest(networkRequest,  (networkRequest: NetworkRequest) => {
-        showSuccess(`${networkRequest.size} request sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')}`);
-     dispatch(removeNetworkRequest(networkRequest.id));
-  }, (networkRequest: NetworkRequest) => {
-    showError(`Failed to send request`);
-  }, 
-  () =>{
-     
-  })}
+    postRequest(networkRequest, (request: NetworkRequest) => {
+        showSuccess(`${request.size} request sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')}`);
+     dispatch(setNetworkRequestAsSent(request.id));
+  }, () => {
+    //maybe to be added later
+  },
+  () => {
 
+  });
+  };
 
   const addNetworkRequestToQueue = (networkRequest: NetworkRequest) => {
     dispatch(addNetworkRequest(networkRequest));
     dispatch(setSendingStatus(sendingStatus.INPROGRESS));
   }
 
-  return {handleClearAll, sendingAllRequests, networkRequests, isSending,  
-    refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue};
-    
+  return { handleClearAll, sendingAllRequests, networkRequests, isSending,
+    refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue };
 }
 
 export default useNetworkRequestsScreen;

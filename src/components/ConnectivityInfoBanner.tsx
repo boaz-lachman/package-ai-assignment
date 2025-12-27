@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { useNetInfoInstance } from "@react-native-community/netinfo";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSpring,
 } from 'react-native-reanimated';
 
 const ConnectivityInfoBanner: React.FC = () => {
-  const { netInfo: { type, isConnected }, refresh } = useNetInfoInstance();
-  
+  const { netInfo: { isConnected } } = useNetInfoInstance();
+
   // Animated value for banner position
   const translateY = useSharedValue(-20);
   const opacity = useSharedValue(0);
@@ -18,7 +17,7 @@ const ConnectivityInfoBanner: React.FC = () => {
   useEffect(() => {
     if (!isConnected) {
       // Slide in and fade in
-      translateY.value = withTiming(0, 
+      translateY.value = withTiming(0,
         { duration: 300 }
       );
       opacity.value = withTiming(1, { duration: 300 });

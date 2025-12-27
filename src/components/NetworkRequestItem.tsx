@@ -11,24 +11,24 @@ import { NetworkRequest, RequestSize } from '../models/networkRequest';
 import { format } from "date-fns";
 
 interface NetworkRequestItemProps {
-    handleRefreshExt: Function,
-    handleRemoveExt: Function,
+    handleRefreshExt: (item: NetworkRequest) => void;
+    handleRemoveExt: (item: NetworkRequest) => void;
   item: NetworkRequest;
+  isSending?: boolean;
 }
 
 const ACTION_WIDTH = 100;
 
-
-const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRemoveExt, handleRefreshExt }) => {
+const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRemoveExt, handleRefreshExt, isSending = false }) => {
   const swipeableRef = useRef<React.ComponentRef<typeof Swipeable>>(null);
 
   const handleRefresh = () => {
-    handleRefreshExt();
+    handleRefreshExt(item);
     swipeableRef.current?.close();
   };
 
   const handleDelete = () => {
-    handleRemoveExt();
+    handleRemoveExt(item);
     swipeableRef.current?.close();
   };
 
@@ -78,11 +78,35 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRem
     );
   };
 
+  const content = (
+    <Animated.View style={styles.container}>
+      <View style={styles.checkmarkContainer}>
+        <Text style={[styles.checkmark, { color: item.isSent ? '#4CAF50' : '#999' }]}>
+          {item.isSent ? '✓✓' : '✓'}
+        </Text>
+      </View>
+      {item.size === RequestSize.Large && (
+        <Image source={{ uri: item.data.uri }} style={styles.image} resizeMode="cover" />
+      )}
+      {item.size === RequestSize.Small && (
+        <Text style={styles.title}>{`request for ${item.data.driver}`} 👍</Text>
+      )}
+      <Text style={styles.size}>Size: {item.size}</Text>
+      <Text style={styles.date}>
+        { format(item.createdAt, 'dd/MM/yyyy HH:mm')}
+      </Text>
+    </Animated.View>
+  );
+
+  if (isSending) {
+    return content;
+  }
+
   return (
     <Swipeable
       ref={swipeableRef}
       renderLeftActions={renderLeftActions}
-      renderRightActions={renderRightActions}
+      renderRightActions={item.isSent ? undefined : renderRightActions}
       onSwipeableOpen={(direction) => {
         if (direction === 'left') {
           handleRefresh();
@@ -93,18 +117,7 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRem
       overshootRight={false}
       overshootLeft={false}
     >
-      <Animated.View style={styles.container}>
-        {item.size === RequestSize.Large && (
-          <Image source={{uri:item.data.uri}} style={styles.image} resizeMode="cover" />
-        )}
-        {item.size === RequestSize.Small && (
-          <Text style={styles.title}>{`request for ${item.data.driver}`}</Text>
-        )}
-        <Text style={styles.size}>Size: {item.size}</Text>
-        <Text style={styles.date}>
-          { format(item.createdAt, 'dd/MM/yyyy HH:mm')}
-        </Text>
-      </Animated.View>
+      {content}
     </Swipeable>
   );
 };
@@ -113,10 +126,22 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#f9f9f9',
     padding: 16,
+    paddingRight: 40,
     marginBottom: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    position: 'relative',
+  },
+  checkmarkContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
+  },
+  checkmark: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   leftAction: {
     flex: 1,
@@ -165,4 +190,3 @@ const styles = StyleSheet.create({
 });
 
 export default NetworkRequestItem;
-
