@@ -46,7 +46,7 @@ const FloatingButtonMenuOption: React.FC<FloatingButtonMenuOptionProps> = ({
 const styles = StyleSheet.create({
   optionButton: {
     position: 'absolute',
-    width: 200,
+    width: 300,
   },
   optionButtonLTR: {
     alignItems: 'flex-end',

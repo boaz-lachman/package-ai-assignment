@@ -87,12 +87,12 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRem
       </View>
       {item.size === RequestSize.Large && (
         <>
-         <Text style={styles.title}>Package was sent 👍. Image Validation:</Text>
+         <Text style={styles.title}>Package was delivered 👍. See an image of where was is placed:</Text>
         <Image source={{ uri: item.data.uri }} style={styles.image} resizeMode="cover" />
         </>
       )}
       {item.size === RequestSize.Small && (
-        <Text style={styles.title}>{`${item.data.driver} is now delivering`} 👍</Text>
+        <Text style={styles.title}>{`${item.data.driver} will be early by 10 minutes`} 👍</Text>
       )}
       <Text style={styles.date}>
         { format(item.createdAt, 'dd/MM/yyyy HH:mm')}

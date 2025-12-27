@@ -39,7 +39,7 @@ const NetworkRequestsScreen: React.FC = () => {
   //options and actions for the floating button
   const options: FloatingButtonOption[] = [
     {
-      title: 'Add Status Update',
+      title: 'Send Status Update',
       onPress: () => {
         const newSmallRequest = createSmallNetworkRequest(uuid.v4(), NETWORK_ADDRESS);
         addNetworkRequestToQueue(newSmallRequest);
@@ -47,7 +47,7 @@ const NetworkRequestsScreen: React.FC = () => {
       color: '#FF6B6B',
     },
     {
-      title: 'Add Image Verification',
+      title: 'Send an image of the package to client',
       onPress: async () => {
         const newLargeRequest = await createBigNetworkRequest(uuid.v4(), NETWORK_ADDRESS);
         addNetworkRequestToQueue(newLargeRequest);
