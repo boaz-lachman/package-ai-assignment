@@ -22,4 +22,4 @@ The requests are attempted to be sent out when a new request is sent out, when t
 The user has the option to remove or retry an unsent network request manually by swiping the request right ('retry') or left 'delete'. The user also has the ability to clear all the pending requests.
 
 
-The app uses a small json object from small request and an image of a tiger for large requests.
+The app uses a small json object for small request ("status update") and an image for large requests ("image of the package").
