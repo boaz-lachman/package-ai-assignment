@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { sendingStatus } from '../constants/sendingStatus';
 import { useSnackbar } from '../contexts/useSnackbarContext';
@@ -40,11 +40,34 @@ const useNetworkRequestsScreen = () => {
             });
         }
 
-     /*when to initiate sending all requests */
+     /*when to initiate sending all requests with debounce */
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (isSending) {
-      sendingAllRequests();
+      // Clear any existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      
+      // Set a new timer to debounce the request sending by 500ms
+      debounceTimerRef.current = setTimeout(() => {
+        sendingAllRequests();
+      }, 500);
+    } else {
+      // Clear timer if sending status changes to false
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
     }
+
+    // Cleanup function to clear timer on unmount
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, [isSending]);
 
   /*listening to both network changes and background foreground changes */
