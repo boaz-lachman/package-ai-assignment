@@ -42,10 +42,13 @@ const useNetworkRequestsScreen = () => {
 
      /*when to initiate sending all requests with debounce */
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevIsSendingRef = useRef<boolean>(false);
 
   useEffect(() => {
-    if (isSending) {
-      // Clear any existing timer
+    // Only reset timer when transitioning from false to true
+    // This ensures the timer isn't cleared if isSending is still true
+    if (isSending && !prevIsSendingRef.current) {
+      // Clear any existing timer before setting a new one
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
@@ -53,14 +56,18 @@ const useNetworkRequestsScreen = () => {
       // Set a new timer to debounce the request sending by 500ms
       debounceTimerRef.current = setTimeout(() => {
         sendingAllRequests();
+        debounceTimerRef.current = null;
       }, 500);
-    } else {
+    } else if (!isSending && prevIsSendingRef.current) {
       // Clear timer if sending status changes to false
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
       }
     }
+
+    // Update previous value
+    prevIsSendingRef.current = isSending;
 
     // Cleanup function to clear timer on unmount
     return () => {
