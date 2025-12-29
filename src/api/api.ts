@@ -8,6 +8,11 @@ import NetInfo from '@react-native-community/netinfo';
 //default timeout for request is 8 seconds
 axios.defaults.timeout = 8000;
 
+// Batch processing configuration
+const BATCH_SIZE = 10; // Number of requests per batch
+const MAX_CONCURRENT = 5; // Maximum concurrent requests within a batch
+const BATCH_DELAY_MS = 100; // Delay between batches (rate limiting)
+
 axiosRetry(axios, { retries: 3,
     retryDelay: axiosRetry.exponentialDelay,
   // attach callback to each retry to handle logging or tracking
@@ -28,6 +33,38 @@ axiosRetry(axios, { retries: 3,
   },
 });
 
+// Utility function to split array into chunks
+const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+};
+
+// Utility function to create a delay
+const delay = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+// Process a batch of requests with controlled concurrency
+const processBatchWithConcurrency = async (
+  batch: NetworkRequest[],
+  maxConcurrent: number,
+  onSuccess: (request: NetworkRequest) => void,
+  onFailure: (request: NetworkRequest) => void
+): Promise<void> => {
+  const concurrentChunks = chunkArray(batch, maxConcurrent);
+  
+  for (const chunk of concurrentChunks) {
+    const promises = chunk.map(request => 
+      createPostRequest(request, onSuccess, onFailure)
+    );
+    
+    await Promise.allSettled(promises);
+  }
+};
+
 //all functions recieve the network request and stemming from it onSuccess onFailure and onFinish actions for sending the network actions
 
 const postAllRequests = async (networkRequests: {small: NetworkRequest[], large: NetworkRequest[]},
@@ -39,14 +76,25 @@ const postAllRequests = async (networkRequests: {small: NetworkRequest[], large:
 
 const postAllRequestsFromAType = async (networkRequests: NetworkRequest[], onSuccess: (request: NetworkRequest) => void, onFailure: (request: NetworkRequest)=> void) : Promise<boolean> => {
    const networkRequestsFiltered = networkRequests.filter((request) => !request.isSent);
-    const axiosRequests = networkRequestsFiltered.map((request) => createPostRequest(request, onSuccess, onFailure));
+   
+   if (networkRequestsFiltered.length === 0) {
+     return true;
+   }
+
     try {
-    const result = await Promise.allSettled(axiosRequests);
-    if (result) {
+        // Split requests into batches
+        const batches = chunkArray(networkRequestsFiltered, BATCH_SIZE);
+        for (let i = 0; i < batches.length; i++) {
+          const batch = batches[i];
+          await processBatchWithConcurrency(batch, MAX_CONCURRENT, onSuccess, onFailure);
+          if (i < batches.length - 1) {
+            await delay(BATCH_DELAY_MS);
+          }
+        }
+        
         return true;
-    }
     } catch {
-      // Error handled by Promise.allSettled
+      //do nothing
     }
     return false;
 }

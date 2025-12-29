@@ -6,14 +6,14 @@ import { getRandomItem } from "./randomiser";
 import uuid from 'react-native-uuid';
 //for creating dummy requests to test architecture
 
-const createSmallNetworkRequest = (id: string, url: string,) => {
+const createSmallNetworkRequest = (id: string, url: string, numberOfTask: number) => {
     const randomDriverName: string = getRandomItem(randomDriverNames)
 
     return new NetworkRequest(id, url, {
         'driver': randomDriverName,
         'status': 'delivering',
         'shift': 'night Shift'
-    }, new Date(), RequestSize.Small);
+    }, numberOfTask, new Date(), RequestSize.Small);
 }
 
 //copy asset to local ddevice to avoid file not found exception in build apk
@@ -33,11 +33,11 @@ const copyAssetToFile = async () => {
     return destPath;
   };
 
-const createBigNetworkRequest = async (id: string, url: string) => {
+const createBigNetworkRequest = async (id: string, url: string, numberOfTask: number) => {
     const newPath = await copyAssetToFile();
     return new NetworkRequest(id, url, {
         uri: newPath
-    }, new Date(), RequestSize.Large);
+    }, numberOfTask, new Date(), RequestSize.Large);
 }
 
 export { createSmallNetworkRequest, createBigNetworkRequest }

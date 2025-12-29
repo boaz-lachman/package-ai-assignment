@@ -4,16 +4,13 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Platform,
-  StatusBar,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import BigList from 'react-native-big-list';
 import { LinearGradient } from 'expo-linear-gradient';
-import { NetworkRequest } from '../models/networkRequest';
+import { NetworkRequest, RequestSize } from '../models/networkRequest';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetworkRequestItem from '../components/NetworkRequestItem';
-
-import FloatingButtonMenu, { FloatingButtonOption } from '../components/FloatingButtonMenu';
+import FloatingActionButtons from '../components/FloatingActionButtons';
 import { createBigNetworkRequest, createSmallNetworkRequest } from '../utils/createNetworkRequests';
 import uuid from 'react-native-uuid';
 import ConnectivityInfoBanner from '../components/ConnectivityInfoBanner';
@@ -25,7 +22,7 @@ const NetworkRequestsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { handleClearAll, networkRequests, isSending,
     refreshSendingNetworkRequest, removeNetworkRequestExt, addNetworkRequestToQueue } = useNetworkRequestsScreen();
-  const renderItem = ({ item }: { item: NetworkRequest }) => {
+  const renderItem = ({ item, index }: { item: NetworkRequest, index: number }) => {
     return (
       <NetworkRequestItem
         handleRemoveExt={() => removeNetworkRequestExt(item)}
@@ -36,31 +33,23 @@ const NetworkRequestsScreen: React.FC = () => {
     );
   };
 
-  //options and actions for the floating button
-  const options: FloatingButtonOption[] = [
-    {
-      title: 'Send Status Update',
-      onPress: () => {
-        const newSmallRequest = createSmallNetworkRequest(uuid.v4(), NETWORK_ADDRESS);
-        addNetworkRequestToQueue(newSmallRequest);
-    },
-      color: '#FF6B6B',
-    },
-    {
-      title: 'Send an image of the package to client',
-      onPress: async () => {
-        const newLargeRequest = await createBigNetworkRequest(uuid.v4(), NETWORK_ADDRESS);
-        addNetworkRequestToQueue(newLargeRequest);
-      },
-      color: '#4ECDC4',
-    },
-  ];
-
-  const keyExtractor = (item: NetworkRequest) => item.id;
   const combined = useMemo(() => {
     const allRequests = [...networkRequests.small, ...networkRequests.large];
     return allRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [networkRequests]);
+
+  const handleSendStatusUpdate = () => {
+    const newSmallRequest = createSmallNetworkRequest(uuid.v4(), NETWORK_ADDRESS, combined.length + 1);
+    addNetworkRequestToQueue(newSmallRequest);
+  };
+
+  const handleSendImage = async () => {
+    const newLargeRequest = await createBigNetworkRequest(uuid.v4(), NETWORK_ADDRESS, combined.length + 1);
+    addNetworkRequestToQueue(newLargeRequest);
+  };
+
+  const keyExtractor = (item: NetworkRequest) => item.id;
+  
   return (
     <View style={styles.wrapper}>
       <View style={[styles.statusBarBackground, { height: insets.top }]} />
@@ -87,10 +76,17 @@ const NetworkRequestsScreen: React.FC = () => {
           )}
         </View>
         <ConnectivityInfoBanner/>
-        <Animated.FlatList
+        <BigList
           data={combined}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
+          itemHeight={(section: number, index: number) => {
+            const item = combined[index];
+            // Add 45px spacing (marginBottom) to each item height
+            return item?.size === RequestSize.Large ? 395 : 145;
+          }}
+          renderHeader={() => null}
+          renderFooter={() => null}
           ListEmptyComponent={
             <View style={styles.emptyDataContainer}>
               <Text style={styles.emptyDataStyle}>No Updates</Text>
@@ -99,11 +95,9 @@ const NetworkRequestsScreen: React.FC = () => {
           contentContainerStyle={styles.listContent}
           style={styles.list}
         />
-         <FloatingButtonMenu
-          options={options}
-          mainButtonColor="#007AFF"
-          mainButtonIcon="+"
-          position="bottom-right"
+        <FloatingActionButtons
+          onStatusPress={handleSendStatusUpdate}
+          onImagePress={handleSendImage}
         />
         </SafeAreaView>
       </LinearGradient>

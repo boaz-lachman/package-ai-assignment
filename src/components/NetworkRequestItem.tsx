@@ -19,7 +19,7 @@ interface NetworkRequestItemProps {
 
 const ACTION_WIDTH = 100;
 
-const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRemoveExt, handleRefreshExt, isSending = false }) => {
+const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({item, handleRemoveExt, handleRefreshExt, isSending = false }) => {
   const swipeableRef = useRef<React.ComponentRef<typeof Swipeable>>(null);
 
   const handleRefresh = () => {
@@ -85,6 +85,7 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({ item, handleRem
           {item.isSent ? '✓✓' : '✓'}
         </Text>
       </View>
+      <Text style={styles.title}>{`Task Number ${item.numberOfTask}:`}</Text>
       {item.size === RequestSize.Large && (
         <>
          <Text style={styles.title}>Package was delivered 👍. See an image of where it was placed:</Text>
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     padding: 16,
     paddingRight: 40,
-    marginBottom: 12,
+    marginBottom: 45,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     borderRadius: 8,
     paddingLeft: 30,
-    marginBottom: 12,
+    marginBottom: 45,
     width: ACTION_WIDTH,
   },
   rightAction: {
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingRight: 30,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 45,
     width: ACTION_WIDTH,
   },
   actionIcon: {
