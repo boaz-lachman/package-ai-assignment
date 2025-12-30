@@ -6,12 +6,12 @@ import { Platform } from "react-native";
 import NetInfo from '@react-native-community/netinfo';
 
 //default timeout for request is 8 seconds
-axios.defaults.timeout = 8000;
+axios.defaults.timeout = 12000;
 
 // Batch processing configuration
 const BATCH_SIZE = 10; // Number of requests per batch
 const MAX_CONCURRENT = 5; // Maximum concurrent requests within a batch
-const BATCH_DELAY_MS = 100; // Delay between batches (rate limiting)
+const BATCH_DELAY_MS = 300; // Delay between batches (rate limiting)
 
 axiosRetry(axios, { retries: 3,
     retryDelay: axiosRetry.exponentialDelay,

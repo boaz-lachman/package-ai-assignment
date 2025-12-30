@@ -46,7 +46,7 @@ const useNetworkRequestsScreen = () => {
 
      /*when to initiate sending all requests with debounce using lodash */
   const debouncedSendingAllRequests = useMemo(
-    () => debounce(sendingAllRequests, 500),
+    () => debounce(sendingAllRequests, 1000),
     [sendingAllRequests]
   );
 

@@ -1,6 +1,7 @@
 import { NetworkRequest, RequestSize } from "../models/networkRequest"
 import * as FileSystem from 'expo-file-system/legacy';
 import { Asset } from 'expo-asset';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { randomDriverNames, randomImageNames, randomImages } from "../constants/networkRequestRandomValues";
 import { getRandomItem } from "./randomiser";
 import uuid from 'react-native-uuid';
@@ -23,12 +24,36 @@ const copyAssetToFile = async () => {
 
     await asset.downloadAsync();
 
-  // Copy to a permanent location
-    const destPath = `${FileSystem.documentDirectory}${uuid.v4()}.jpg`;
-    FileSystem.copyAsync({
+  // Copy to a temporary location first
+    const tempPath = `${FileSystem.documentDirectory}${uuid.v4()}_temp.jpg`;
+    await FileSystem.copyAsync({
         from: asset.localUri!,
+        to: tempPath
+    });
+
+    // Compress the image using ImageManipulator
+    const manipulatedImage = await ImageManipulator.manipulateAsync(
+        tempPath,
+        [], // No transformations, just compression
+        {
+            compress: 0.7, // Compress to 70% quality
+            format: ImageManipulator.SaveFormat.JPEG,
+        }
+    );
+
+    // Move compressed image to final location
+    const destPath = `${FileSystem.documentDirectory}${uuid.v4()}.jpg`;
+    await FileSystem.moveAsync({
+        from: manipulatedImage.uri,
         to: destPath
     });
+
+    // Clean up temporary file if it still exists
+    try {
+        await FileSystem.deleteAsync(tempPath, { idempotent: true });
+    } catch (error) {
+        // Ignore cleanup errors
+    }
 
     return destPath;
   };

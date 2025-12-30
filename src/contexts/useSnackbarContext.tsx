@@ -39,12 +39,12 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Debounce snackbar messages by 500 milliseconds
   const showSuccess = useMemo(
-    () => debounce(showSuccessInternal, 500),
+    () => debounce(showSuccessInternal, 1000),
     [showSuccessInternal]
   );
 
   const showError = useMemo(
-    () => debounce(showErrorInternal, 500),
+    () => debounce(showErrorInternal, 1000),
     [showErrorInternal]
   );
 
