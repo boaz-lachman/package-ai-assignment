@@ -93,7 +93,8 @@ const postAllRequestsFromAType = async (networkRequests: NetworkRequest[], onSuc
         }
         
         return true;
-    } catch {
+    } catch(error) {
+      console.error(error);
       //do nothing
     }
     return false;

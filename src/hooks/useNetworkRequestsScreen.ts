@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { sendingStatus } from '../constants/sendingStatus';
 import { useSnackbar } from '../contexts/useSnackbarContext';
@@ -9,14 +9,18 @@ import { useNetInfoInstance } from '@react-native-community/netinfo';
 import { Alert } from 'react-native';
 import useAppIsInForeground from './useAppIsInForeground';
 import { format } from "date-fns";
+import { debounce } from 'lodash';
 
 const useNetworkRequestsScreen = () => {
+    // All hooks must be called at the top level in the same order every render
     const networkRequests = useSelector((state: networkRequestsState) => state.networkRequests || { small: [], large: [] });
     const isSending = useSelector((state: networkRequestsState) => state.sendingStatus === sendingStatus.INPROGRESS);
     const dispatch = useDispatch();
     const { showSuccess } = useSnackbar();
+    const { netInfo: { isConnected } } = useNetInfoInstance();
+    const isAppInForeground = useAppIsInForeground();
 
-    const sendingAllRequests = () => {
+    const sendingAllRequests = useCallback(() => {
         let successCount = 0;
             const failureCount = 0;
             const totalRequests = networkRequests.small.filter(req => !req.isSent).length + networkRequests.large.filter(req => !req.isSent).length;
@@ -38,61 +42,40 @@ const useNetworkRequestsScreen = () => {
                   } else {}
                 }
             });
-        }
+        }, [networkRequests, showSuccess, dispatch]);
 
-     /*when to initiate sending all requests with debounce */
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prevIsSendingRef = useRef<boolean>(false);
+     /*when to initiate sending all requests with debounce using lodash */
+  const debouncedSendingAllRequests = useMemo(
+    () => debounce(sendingAllRequests, 500),
+    [sendingAllRequests]
+  );
 
   useEffect(() => {
-    // Only reset timer when transitioning from false to true
-    // This ensures the timer isn't cleared if isSending is still true
-    if (isSending && !prevIsSendingRef.current) {
-      // Clear any existing timer before setting a new one
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-      
-      // Set a new timer to debounce the request sending by 500ms
-      debounceTimerRef.current = setTimeout(() => {
-        sendingAllRequests();
-        debounceTimerRef.current = null;
-      }, 500);
-    } else if (!isSending && prevIsSendingRef.current) {
-      // Clear timer if sending status changes to false
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
+    if (isSending) {
+      debouncedSendingAllRequests();
+    } else {
+      // Cancel pending debounced calls when isSending becomes false
+      debouncedSendingAllRequests.cancel();
     }
 
-    // Update previous value
-    prevIsSendingRef.current = isSending;
-
-    // Cleanup function to clear timer on unmount
+    // Cleanup function to cancel pending debounced calls on unmount
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      debouncedSendingAllRequests.cancel();
     };
-  }, [isSending]);
+  }, [isSending, debouncedSendingAllRequests]);
 
   /*listening to both network changes and background foreground changes */
-  const { netInfo: { isConnected } } = useNetInfoInstance();
-
   useEffect(() => {
     if (isConnected) {
       dispatch(setSendingStatus(sendingStatus.INPROGRESS));
     }
-  }, [isConnected])
-
-  const isAppInForeground = useAppIsInForeground();
+  }, [isConnected, dispatch])
 
   useEffect(() => {
     if (isAppInForeground) {
       dispatch(setSendingStatus(sendingStatus.INPROGRESS));
     }
-  }, [isAppInForeground])
+  }, [isAppInForeground, dispatch])
 
   const handleClearAll = () => {
     Alert.alert(

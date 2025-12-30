@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import { Snackbar } from 'react-native-paper';
+import { debounce } from 'lodash';
 
 interface SnackbarContextType {
   showSuccess: (message: string) => void;
@@ -20,21 +21,40 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     visible: false,
   });
 
-  const showSuccess = (message: string) => {
+  const showSuccessInternal = useCallback((message: string) => {
     setSnackbar({
       message,
       type: 'success',
       visible: true,
     });
-  };
+  }, []);
 
-  const showError = (message: string) => {
+  const showErrorInternal = useCallback((message: string) => {
     setSnackbar({
       message,
       type: 'error',
       visible: true,
     });
-  };
+  }, []);
+
+  // Debounce snackbar messages by 500 milliseconds
+  const showSuccess = useMemo(
+    () => debounce(showSuccessInternal, 500),
+    [showSuccessInternal]
+  );
+
+  const showError = useMemo(
+    () => debounce(showErrorInternal, 500),
+    [showErrorInternal]
+  );
+
+  // Cleanup debounced functions on unmount
+  useEffect(() => {
+    return () => {
+      showSuccess.cancel();
+      showError.cancel();
+    };
+  }, [showSuccess, showError]);
 
   const handleDismiss = () => {
     setSnackbar((prev) => ({ ...prev, visible: false }));
