@@ -32,7 +32,9 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({item, handleRemo
     swipeableRef.current?.close();
   };
 
-  const renderLeftActions = (
+  // Always define render functions to ensure hooks are called consistently
+  // These functions will be called by Swipeable when needed
+  const renderLeftActions = React.useCallback((
     progress: SharedValue<number>,
     dragX: SharedValue<number>
   ) => {
@@ -48,14 +50,19 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({item, handleRemo
       };
     });
 
+    // Return null if sending to disable the action
+    if (isSending) {
+      return null;
+    }
+
     return (
       <Animated.View style={[styles.leftAction, scale]}>
         <Text style={styles.actionIcon}>🗑️</Text>
       </Animated.View>
     );
-  };
+  }, [isSending]);
 
-  const renderRightActions = (
+  const renderRightActions = React.useCallback((
     progress: SharedValue<number>,
     dragX: SharedValue<number>
   ) => {
@@ -71,12 +78,17 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({item, handleRemo
       };
     });
 
+    // Return null if sending or already sent to disable the action
+    if (isSending || item.isSent) {
+      return null;
+    }
+
     return (
       <Animated.View style={[styles.rightAction, scale]}>
         <Text style={styles.actionIcon}>🔄</Text>
       </Animated.View>
     );
-  };
+  }, [isSending, item.isSent]);
 
   const content = (
     <Animated.View style={styles.container}>
@@ -101,16 +113,15 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({item, handleRemo
     </Animated.View>
   );
 
-  if (isSending) {
-    return content;
-  }
-
+  // Always render Swipeable and always provide render functions
+  // This ensures hooks are called in the same order every render
   return (
     <Swipeable
       ref={swipeableRef}
       renderLeftActions={renderLeftActions}
-      renderRightActions={item.isSent ? undefined : renderRightActions}
+      renderRightActions={renderRightActions}
       onSwipeableOpen={(direction) => {
+        if (isSending) return;
         if (direction === 'left') {
           handleRefresh();
         } else if (direction === 'right') {
@@ -119,6 +130,7 @@ const NetworkRequestItem: React.FC<NetworkRequestItemProps> = ({item, handleRemo
       }}
       overshootRight={false}
       overshootLeft={false}
+      enabled={!isSending}
     >
       {content}
     </Swipeable>

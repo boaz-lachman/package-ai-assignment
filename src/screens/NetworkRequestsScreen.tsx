@@ -82,7 +82,6 @@ const NetworkRequestsScreen: React.FC = () => {
           keyExtractor={keyExtractor}
           itemHeight={(section: number, index: number) => {
             const item = combined[index];
-            // Add 45px spacing (marginBottom) to each item height
             return item?.size === RequestSize.Large ? 395 : 145;
           }}
           renderHeader={() => null}

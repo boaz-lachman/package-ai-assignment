@@ -38,7 +38,7 @@ const useNetworkRequestsScreen = () => {
                 // Show summary message if multiple requests
                 if (totalRequests > 1) {
                   if (successCount !== 0) {
-                    showSuccess(`${successCount} updates sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')} `);
+                    showSuccess(`updates were sent successfully at ${format(new Date(), 'dd/MM/yyyy HH:mm')} `);
                   } else {}
                 }
             });
